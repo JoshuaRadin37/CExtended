@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include "parser_wrapper.h"
 
+
 int main(int argc, char* argv[]) {
     printf("Hello, World!\n");
 
@@ -12,7 +13,13 @@ int main(int argc, char* argv[]) {
 
     // howdy
 
-    parse("main.c");
+    if (argc > 1) {
+        for (size_t i = 1; i < argc; i++)
+        {
+            parse(argv[i]);
+        }
+        
+    }
 
     system("rm -r temp");
     return 0;

@@ -8,16 +8,21 @@ IS                      ((u|U)|(u|U)?(l|L|ll|LL)|(l|L|ll|LL)(u|U))
 
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "parser.h"
+
 
 void count(void);
 void comment(void);
 int check_type(void);
+static int next_is_type_name = 0;
+
 %}
 
 %%
 "/*"			{ comment(); }
 "//"[^\n]*              { /* consume //-comment */ }
+"#"[^\n]*		{ /* consume macro */ }
 
 
 "auto"			{ count(); return(AUTO); }
@@ -49,14 +54,19 @@ int check_type(void);
 "signed"		{ count(); return(SIGNED); }
 "sizeof"		{ count(); return(SIZEOF); }
 "static"		{ count(); return(STATIC); }
-"struct"		{ count(); return(STRUCT); }
+"struct"		{ count(); next_is_type_name = 1; return(STRUCT); }
 "switch"		{ count(); return(SWITCH); }
 "typedef"		{ count(); return(TYPEDEF); }
-"union"			{ count(); return(UNION); }
+"union"			{ count(); next_is_type_name = 1; return(UNION); }
 "unsigned"		{ count(); return(UNSIGNED); }
 "void"			{ count(); return(VOID); }
 "volatile"		{ count(); return(VOLATILE); }
 "while"			{ count(); return(WHILE); }
+"public"		{ count(); return(PUBLIC); }
+"private"		{ count(); return(PRIVATE); }
+"class"			{ count(); next_is_type_name = 1; return(CLASS); }
+"constructor"	{ count(); return(CONSTRUCTOR); }
+"init"			{ count(); return(INIT); }
 
 {L}({L}|{D})*		{ count(); return(check_type()); }
 
@@ -98,7 +108,7 @@ L?\"(\\.|[^\\"\n])*\"	{ count(); return(STRING_LITERAL); }
 "=="			{ count(); return(EQ_OP); }
 "!="			{ count(); return(NE_OP); }
 ";"			{ count(); return(';'); }
-("{"|"<%")		{ count(); return('{'); }
+("{"|"<%")		{ count(); if(next_is_type_name) next_is_type_name = 0; return('{'); }
 ("}"|"%>")		{ count(); return('}'); }
 ","			{ count(); return(','); }
 ":"			{ count(); return(':'); }
@@ -168,6 +178,7 @@ void count(void)
 
 int check_type(void)
 {
+
 /*
 * pseudo code --- this is what it should check
 *
@@ -180,6 +191,8 @@ int check_type(void)
 /*
 *	it actually will only return IDENTIFIER
 */
+
+
 
 	return IDENTIFIER;
 }

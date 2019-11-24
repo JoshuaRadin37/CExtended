@@ -1,0 +1,27 @@
+#include <stdlib.h>
+
+class object { 
+
+    public int equals(object other) {
+        return this == other;
+    }
+};
+
+
+class child constructor (char* name) : object() {
+    private char* name;
+    
+    init {
+        this->name = name;
+    }
+
+    public char* get_name() {
+        return name;
+    }
+};
+
+
+int main(int argc, char* argv[]) {
+    
+    return 0;
+}

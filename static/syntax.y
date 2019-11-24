@@ -9,7 +9,7 @@
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
 %token BOOL COMPLEX IMAGINARY
 %token STRUCT UNION ENUM ELLIPSIS CLASS
-%token PUBLIC PRIVATE
+%token PUBLIC PRIVATE CONSTRUCTOR INIT
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
@@ -210,7 +210,7 @@ type_specifier
 	| struct_or_union_specifier
 	| class_specifier
 	| enum_specifier
-	| TYPE_NAME
+	| IDENTIFIER
 	;
 
 struct_or_union_specifier
@@ -220,12 +220,58 @@ struct_or_union_specifier
 	;
 
 class_specifier
-	: CLASS IDENTIFIER '{' '}'			{ printf("class defintion found\n"); }
-	| CLASS IDENTIFIER
+	: CLASS IDENTIFIER public_or_private_or_none CONSTRUCTOR '(' parameter_type_list ')' parent_class '{' class_declaration_list '}'		{ printf("class defintion found\n"); }
+	| CLASS IDENTIFIER '(' parameter_type_list ')' parent_class '{' class_declaration_list '}'											{ printf("class defintion found\n"); }
+	| CLASS IDENTIFIER parent_class '{' class_declaration_list '}'											{ printf("class defintion found\n"); }
+	| CLASS IDENTIFIER																										{ printf("class declaratoin found\n"); }
+	;
+
+parent_class
+	: ':' IDENTIFIER '(' argument_expression_list ')'
+	| ':' IDENTIFIER '(' ')'
+	| %empty
+	;
 
 struct_or_union
 	: STRUCT
 	| UNION
+	;
+
+class_declaration_list
+	: class_declaration class_declaration_list 
+	| %empty
+	;
+
+class_declaration
+	: class_declaration_specifier_list type_specifier IDENTIFIER '(' parameter_type_list ')' class_declaration_definition_or_end { printf("function dec\n");}
+	| class_declaration_specifier_list type_specifier IDENTIFIER '(' ')' class_declaration_definition_or_end { printf("function dec\n");}
+	
+	| class_declaration_specifier_list type_specifier IDENTIFIER class_declaration_definition_or_end
+	| INIT compound_statement
+	;
+
+class_declaration_definition_or_end
+	: ';'
+	| compound_statement
+	;
+
+class_declaration_specifier_list
+	: class_declaration_specifier_list class_declaration_specifier
+	| %empty
+	;
+
+class_declaration_specifier
+	: public_or_private_or_none
+	| class_declaration_static
+	;
+
+public_or_private_or_none
+	: PUBLIC
+	| PRIVATE
+	;
+
+class_declaration_static
+	: STATIC
 	;
 
 struct_declaration_list
